@@ -3,7 +3,6 @@
 namespace Database\Seeders;
 
 use App\Models\User;
-// use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\Hash;
 use Spatie\Permission\Models\Role;
@@ -15,37 +14,40 @@ class DatabaseSeeder extends Seeder
      */
     public function run(): void
     {
+        // 1. Buat Role (Aman, tidak akan duplikat)
+        $roleAdmin = Role::firstOrCreate(['name' => 'admin']);
+        $rolePendidik = Role::firstOrCreate(['name' => 'pendidik']);
+        $roleUser = Role::firstOrCreate(['name' => 'user']);
+        $rolePembimbing = Role::firstOrCreate(['name' => 'pembimbing']);
 
-        Role::firstOrCreate(['name' => 'admin']);
-        Role::firstOrCreate(['name' => 'pendidik']);
-        Role::firstOrCreate(['name' => 'user']);
-        Role::firstOrCreate(['name' => 'pembimbing']);
-        
-        $pendidik=User::factory()->create([
-            'name' => 'Test User',
-            'email' => 'test@example.com',
-            'password' => Hash::make('12344321'),
-            'role'=>'user'
-        ]);
+        $user = User::firstOrCreate(
+            ['email' => 'test@example.com'],
+            [
+                'name' => 'Test User',
+                'password' => Hash::make('12344321'),
+                'email_verified_at' => now(),
+            ]
+        );
+        $user->assignRole($roleUser);
 
-        $pendidik->assignRole('user');
+        $admin = User::firstOrCreate(
+            ['email' => 'admin@example.com'], 
+            [
+                'name' => 'Super Admin',
+                'password' => Hash::make('12344321'),
+                'email_verified_at' => now(),
+            ]
+        );
+        $admin->assignRole($roleAdmin);
 
-        $admin = User::factory()->create([
-            'name' => 'Admin',
-            'email' => 'admin@example.com',
-            'password' => bcrypt('12344321'),
-            'role' => 'admin',
-        ]);
-
-        $admin->assignRole('admin');
-
-        $pembimbing = User::factory()->create([
-            'name' => 'Pendidik',
-            'email' => 'pendidik@example.com',
-            'role' => 'pembimbing',
-            'password' => bcrypt('12344321'),
-        ]);
-
-        $pembimbing->assignRole('pembimbing');
+        $pembimbing = User::firstOrCreate(
+            ['email' => 'pendidik@example.com'], 
+            [
+                'name' => 'Bapak Pendidik',
+                'password' => Hash::make('12344321'),
+                'email_verified_at' => now(),
+            ]
+        );
+        $pembimbing->assignRole($rolePembimbing);
     }
 }
