@@ -7,6 +7,7 @@ use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\MonitoringController;
 use App\Http\Controllers\PengumpulanController;
 use App\Http\Controllers\VideoProgressController;
+use Illuminate\Support\Facades\Auth;
 
 // halaman utama
 Route::get('/', function () {
@@ -17,6 +18,19 @@ Route::get('/', function () {
 Route::get('/tentang-kita', function(){
     return view('kita');
 })->name('kita');
+
+// Route ini menangkap user setelah login.
+Route::get('/dashboard', function () {
+    /** @var \App\Models\User $user */
+    $user = Illuminate\Support\Facades\Auth::user();
+    if ($user && $user->hasRole('admin')) {
+        return redirect('/admin');
+    }
+
+    // Jika bukan admin (user/pendidik), tampilkan dashboard biasa
+    return view('dashboard'); 
+})->middleware(['auth', 'verified'])->name('dashboard');
+// ------------------------------------------
 
 // halaman tugas
 Route::get('/tugas', function(){
@@ -71,6 +85,5 @@ Route::middleware('auth')->group(function () {
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
 });
-
 
 require __DIR__.'/auth.php';
